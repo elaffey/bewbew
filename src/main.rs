@@ -1,0 +1,66 @@
+#![deny(warnings)]
+
+use std::convert::Infallible;
+
+use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Request, Response, Server};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tracing::{error, info, span, Level};
+use tracing_futures::Instrument;
+use tracing_subscriber;
+
+async fn serve(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    let span = span!(
+        Level::TRACE,
+        "request",
+        method = ?req.method(),
+        uri = ?req.uri(),
+        headers = ?req.headers()
+    );
+    let _enter = span.enter();
+    info!("received request");
+    Ok(Response::new(Body::from("Hello World!")))
+}
+
+pub async fn go() {
+    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+
+    let server_span = span!(Level::INFO, "server", %addr);
+    let _enter = server_span.enter();
+
+    // For every connection, we must make a `Service` to handle all
+    // incoming HTTP requests on said connection.
+    let service = make_service_fn(|_conn| {
+        // This is the `Service` that will handle the connection.
+        // `service_fn` is a helper to convert a function that
+        // returns a Response into a `Service`.
+        async { Ok::<_, Infallible>(service_fn(serve)) }
+    });
+
+    let server = Server::bind(&addr)
+        .serve(service)
+        .instrument(server_span.clone());
+
+    info!("Listening");
+
+    match server.await {
+        Ok(result) => info!("Got result {:?}", result),
+        Err(e) => error!("Got error {:?}", e),
+    }
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let subscriber = tracing_subscriber::fmt()
+        .with_env_filter("info,hyper=warn")
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)?;
+
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(go());
+    Ok(())
+}
+
