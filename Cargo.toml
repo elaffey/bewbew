@@ -3,5 +3,6 @@ resolver = "2"
 
 members = [
     "bewbew",
-    "server_sdk"
+    "server_sdk",
+    "keypair_maker"
 ]
