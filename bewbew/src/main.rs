@@ -50,6 +50,8 @@ pub async fn go() {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let h = server_sdk::hi();
+    dbg!(h);
     let subscriber = tracing_subscriber::fmt()
         .with_env_filter("info,hyper=warn")
         .finish();
@@ -63,4 +65,3 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .block_on(go());
     Ok(())
 }
-
