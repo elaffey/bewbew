@@ -3,3 +3,4 @@ target
 tags
 *.p8
 *db
+salt_secret

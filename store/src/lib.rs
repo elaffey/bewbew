@@ -47,11 +47,14 @@ mod tests {
     use super::*;
     #[test]
     fn it_works() {
-        let h = open().unwrap();
+        let db = sled::open("tmp_db").unwrap();
+        db.clear().unwrap();
+        let h = Handle::new(db);
         let username = "eamonn".to_string();
         let pw_hash = b"secret".to_vec();
         let usr_auth = UserAuth { username, pw_hash };
-        store_user_auth(&h, &usr_auth);
+        let res = store_user_auth(&h, &usr_auth);
+        assert!(res.is_ok());
         let got = get_user_auth(&h, "eamonn").unwrap().unwrap();
         assert_eq!(&got.username, "eamonn");
         assert_eq!(&got.pw_hash, b"secret");

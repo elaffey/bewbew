@@ -1,12 +1,7 @@
-use lazy_static::lazy_static;
 use ring::signature::{Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
 use ring::{digest, pbkdf2};
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroU32;
-
-lazy_static! {
-    static ref KEY_PAIR: Ed25519KeyPair = load_key_pair();
-}
 
 fn load_key_pair() -> Ed25519KeyPair {
     use std::io::Read;

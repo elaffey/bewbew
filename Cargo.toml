@@ -2,7 +2,7 @@
 members = [
     "bewbew",
     "server_sdk",
-    "keypair_maker",
+    "cli",
     "error",
     "store"
 ]
