@@ -1,6 +1,8 @@
 use lazy_static::lazy_static;
 use ring::signature::{Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
+use ring::{digest, pbkdf2};
 use serde::{Serialize, Deserialize};
+use std::num::NonZeroU32;
 
 lazy_static! {
     static ref KEY_PAIR: Ed25519KeyPair = load_key_pair();
@@ -42,17 +44,64 @@ pub fn verify(key_pair: &Ed25519KeyPair, token: &Token) -> bool {
     peer_public_key.verify(&bytes, &token.signature).is_ok()
 }
 
+fn salt(usr: &str, salt_secret: &[u8]) -> Vec<u8> {
+    let usr = usr.as_bytes();
+    let len = salt_secret.len() + usr.len();
+    let mut salt = Vec::with_capacity(len);
+    salt.extend(salt_secret.iter());
+    salt.extend(usr);
+    salt
+}
+
+fn hash_pw(usr: &str, pw: &str, salt_secret: &[u8]) -> Vec<u8> {
+    let salt = salt(usr, salt_secret);
+    let iters = NonZeroU32::new(100_000).unwrap();
+    let alg = pbkdf2::PBKDF2_HMAC_SHA256;
+    let mut buf = [0u8; digest::SHA256_OUTPUT_LEN];
+    pbkdf2::derive(
+        alg,
+        iters,
+        &salt,
+        pw.as_bytes(),
+        &mut buf,
+    );
+    buf.to_vec()
+}
+
+fn verify_pw(usr: &str, pw: &str, hash: &[u8], salt_secret: &[u8]) -> bool {
+    let salt = salt(usr, salt_secret);
+    let iters = NonZeroU32::new(100_000).unwrap();
+    let alg = pbkdf2::PBKDF2_HMAC_SHA256;
+    pbkdf2::verify(
+        alg,
+        iters,
+        &salt,
+        pw.as_bytes(),
+        hash,
+    )
+    .is_ok()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
-    fn hello() {
+    fn test_token() {
         let rng = ring::rand::SystemRandom::new();
         let pkcs8_bytes = Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
         let key_pair = Ed25519KeyPair::from_pkcs8(pkcs8_bytes.as_ref()).unwrap();
         let token = gen_token(&key_pair, "me@elaffey.com");
         let ok = verify(&key_pair, &token);
         assert!(ok);
+    }
+
+    #[test]
+    fn test_pw() {
+        let salt_secret = b"123";
+        let hashed = hash_pw("eamonn", "secret", salt_secret);
+        assert!(verify_pw("eamonn", "secret", &hashed, salt_secret));
+        assert!(!verify_pw("eamonn", "wrong", &hashed, salt_secret));
+        assert!(!verify_pw("julia", "secret", &hashed, salt_secret));
     }
 }
 

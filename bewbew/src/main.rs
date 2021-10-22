@@ -7,7 +7,6 @@ use hyper::{Body, Request, Response, Server};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tracing::{error, info, span, Level};
 use tracing_futures::Instrument;
-use tracing_subscriber;
 
 async fn serve(req: Request<Body>) -> Result<Response<Body>, Infallible> {
     let span = span!(
