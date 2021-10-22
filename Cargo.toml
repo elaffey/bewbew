@@ -1,8 +1,8 @@
 [workspace]
-resolver = "2"
-
 members = [
     "bewbew",
     "server_sdk",
-    "keypair_maker"
+    "keypair_maker",
+    "error",
+    "store"
 ]

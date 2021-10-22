@@ -23,7 +23,6 @@ async fn serve(req: Request<Body>) -> Result<Response<Body>, Infallible> {
 
 pub async fn go() {
     let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
-
     let server_span = span!(Level::INFO, "server", %addr);
     let _enter = server_span.enter();
 

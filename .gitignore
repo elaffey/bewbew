@@ -2,3 +2,4 @@ target
 **/*.rs.bk
 tags
 *.p8
+*db
