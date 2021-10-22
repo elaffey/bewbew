@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 use ring::signature::{Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
 use ring::{digest, pbkdf2};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::num::NonZeroU32;
 
 lazy_static! {
@@ -18,7 +18,7 @@ fn load_key_pair() -> Ed25519KeyPair {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Claims {
-    email: String
+    email: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,13 +28,12 @@ pub struct Token {
 }
 
 pub fn gen_token(key_pair: &Ed25519KeyPair, email: &str) -> Token {
-    let claims = Claims { email: String::from(email) };
+    let claims = Claims {
+        email: String::from(email),
+    };
     let bytes: Vec<u8> = bincode::serialize(&claims).unwrap();
     let signature: Vec<u8> = key_pair.sign(&bytes).as_ref().into();
-    Token {
-        claims,
-        signature,
-    }
+    Token { claims, signature }
 }
 
 pub fn verify(key_pair: &Ed25519KeyPair, token: &Token) -> bool {
@@ -58,13 +57,7 @@ fn hash_pw(usr: &str, pw: &str, salt_secret: &[u8]) -> Vec<u8> {
     let iters = NonZeroU32::new(100_000).unwrap();
     let alg = pbkdf2::PBKDF2_HMAC_SHA256;
     let mut buf = [0u8; digest::SHA256_OUTPUT_LEN];
-    pbkdf2::derive(
-        alg,
-        iters,
-        &salt,
-        pw.as_bytes(),
-        &mut buf,
-    );
+    pbkdf2::derive(alg, iters, &salt, pw.as_bytes(), &mut buf);
     buf.to_vec()
 }
 
@@ -72,14 +65,7 @@ fn verify_pw(usr: &str, pw: &str, hash: &[u8], salt_secret: &[u8]) -> bool {
     let salt = salt(usr, salt_secret);
     let iters = NonZeroU32::new(100_000).unwrap();
     let alg = pbkdf2::PBKDF2_HMAC_SHA256;
-    pbkdf2::verify(
-        alg,
-        iters,
-        &salt,
-        pw.as_bytes(),
-        hash,
-    )
-    .is_ok()
+    pbkdf2::verify(alg, iters, &salt, pw.as_bytes(), hash).is_ok()
 }
 
 #[cfg(test)]

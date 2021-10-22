@@ -20,4 +20,3 @@ impl std::fmt::Display for Error {
         write!(f, "{}", self.details)
     }
 }
-
