@@ -1,12 +1,11 @@
-#![deny(warnings)]
-
-use std::convert::Infallible;
-
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server};
+use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tracing::metadata::LevelFilter;
 use tracing::{error, info, span, Level};
 use tracing_futures::Instrument;
+use tracing_subscriber::filter::EnvFilter;
 
 async fn serve(req: Request<Body>) -> Result<Response<Body>, Infallible> {
     let span = span!(
@@ -50,12 +49,11 @@ pub async fn go() {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let h = server_sdk::hi();
     dbg!(h);
-    let subscriber = tracing_subscriber::fmt()
-        .with_env_filter("info,hyper=warn")
-        .finish();
-
+    let filter = EnvFilter::from_default_env()
+        .add_directive(LevelFilter::TRACE.into())
+        .add_directive("hyper=info".parse()?);
+    let subscriber = tracing_subscriber::fmt().with_env_filter(filter).finish();
     tracing::subscriber::set_global_default(subscriber)?;
-
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
