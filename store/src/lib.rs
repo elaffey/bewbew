@@ -1,5 +1,6 @@
 use error::Error;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 pub struct Handle {
     db: sled::Db,
@@ -11,8 +12,8 @@ impl Handle {
     }
 }
 
-pub fn open() -> Result<Handle, Error> {
-    let db = sled::open("db").map_err(|e| Error::wrap("open db", e))?;
+pub fn open<P: AsRef<Path>>(path: P) -> Result<Handle, Error> {
+    let db = sled::open(path).map_err(|e| Error::wrap("open db", e))?;
     Ok(Handle::new(db))
 }
 
