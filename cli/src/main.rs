@@ -14,7 +14,7 @@ struct GenKeyPair {
 
 #[derive(FromArgs, PartialEq, Debug)]
 #[argh(subcommand, name = "gen_salt_secret")]
-/// Output 16 random bytes to a file 
+/// Output 16 random bytes to a file
 struct GenSaltSecret {
     #[argh(option)]
     /// output file location
@@ -65,7 +65,7 @@ fn main() {
         SubCommands::GenSaltSecret(args) => gen_salt_secret(args),
     };
     match res {
-        Ok(_) => println!("done"),
-        Err(e) => eprintln!("problem! - {}", e),
+        Ok(_) => println!("success"),
+        Err(e) => eprintln!("error - {}", e),
     }
 }

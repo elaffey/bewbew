@@ -9,6 +9,7 @@ impl Error {
         Self { details }
     }
 
+    #[must_use]
     pub fn wrap(msg: &str, inner: impl std::fmt::Display) -> Self {
         let details = format!("{} - {}", msg, inner);
         Self::new(details)
