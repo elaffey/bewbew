@@ -25,12 +25,7 @@ pub async fn go() {
     let server_span = span!(Level::INFO, "server", %addr);
     let _enter = server_span.enter();
 
-    // For every connection, we must make a `Service` to handle all
-    // incoming HTTP requests on said connection.
     let service = make_service_fn(|_conn| {
-        // This is the `Service` that will handle the connection.
-        // `service_fn` is a helper to convert a function that
-        // returns a Response into a `Service`.
         async { Ok::<_, Infallible>(service_fn(serve)) }
     });
 

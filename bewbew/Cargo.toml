@@ -8,5 +8,5 @@ hyper = { version = "0.14.14", features = ["full"] }
 tokio = { version = "1.12.0", features = ["full"] }
 tracing = "0.1.29"
 tracing-futures = "0.2.5"
-tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.1", features = ["env-filter"] }
 server_sdk = { path = "../server_sdk" }
