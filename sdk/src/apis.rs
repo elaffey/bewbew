@@ -1,33 +1,14 @@
 use super::state::State;
 use error::Error;
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct SignUpReq {
-    pub username: String,
-    pub password: String,
-}
+use types::{UserAuth, SignUpReq, LoginRes, LoginReq};
 
 pub fn sign_up(state: &State, req: SignUpReq) -> Result<(), Error> {
     let pw_hash = super::auth::hash_pw(&req.username, &req.password, &state.salt_secret);
-    let user_auth = store::UserAuth {
+    let user_auth = UserAuth {
         username: req.username,
         pw_hash,
     };
     store::store_user_auth(&state.handle, &user_auth)
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LoginReq {
-    pub username: String,
-    pub password: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum LoginRes {
-    Success,
-    Fail,
-    UserNotFound,
 }
 
 pub fn login(state: &State, req: LoginReq) -> Result<LoginRes, Error> {

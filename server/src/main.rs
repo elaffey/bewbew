@@ -1,42 +1,26 @@
 use error::Error;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, StatusCode, Response, Server};
-use serde::{Deserialize, Serialize};
-use sdk::apis::{LoginReq, LoginRes, SignUpReq};
+use types::{Req, PlusOneRes, PlusOneResType};
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tracing::metadata::LevelFilter;
 use tracing::{error, info, span, Level};
 use tracing_futures::Instrument;
 use tracing_subscriber::filter::EnvFilter;
+use std::io::Read;
 
-#[derive(Serialize, Deserialize, Debug)]
-enum Req {
-    PlusOne(u32),
-    SignUpReq(SignUpReq),
-    Login(LoginReq),
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct PlusOneRes {
-    msg: String,
-    num: u32,
-}
-
-type PlusOneResType = Result<PlusOneRes, Error>;
-
-async fn read_request<T>(req: Request<Body>) -> Result<T, Error>
-where
-    T: serde::de::DeserializeOwned,
-    T: Sized,
+async fn read_request(req: Request<Body>) -> Result<impl Read, Error>
 {
     use hyper::body::Buf;
     let body = hyper::body::aggregate(req)
         .await
         .map_err(|e| Error::wrap("reading request body", e))?;
-    let result = bincode::deserialize_from(body.reader())
-        .map_err(|e| Error::wrap("deserialising request body", e))?;
-    Ok(result)
+    Ok(body.reader())
+//    let reader: u32 = body.reader();
+//    let result = bincode::deserialize_from(body.reader())
+//        .map_err(|e| Error::wrap("deserialising request body", e))?;
+//    Ok(result)
 }
 
 fn do_adding(n: u32) -> PlusOneResType {
@@ -60,13 +44,15 @@ async fn serve(req: Request<Body>) -> Response<Body> {
     );
     let _enter = span.enter();
     info!("received request");
-    match read_request::<Req>(req).await {
+    let reader = read_request(req).await.unwrap();
+    let derd = types::de_from(reader);
+    match derd {
         Ok(r) => {
             dbg!(&r);
             match r {
                 Req::PlusOne(n) => {
                     let res = do_adding(n);
-                    let bytes = bincode::serialize(&res).unwrap();
+                    let bytes = types::ser(&res).unwrap();
                     Response::new(Body::from(bytes))
                 }
                 _ => {

@@ -110,12 +110,11 @@ dependencies = [
 name = "client"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "error",
  "reqwest",
  "sdk",
- "serde",
  "tokio",
+ "types",
 ]
 
 [[package]]
@@ -863,11 +862,10 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 name = "sdk"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "error",
  "ring",
- "serde",
  "store",
+ "types",
 ]
 
 [[package]]
@@ -940,15 +938,14 @@ dependencies = [
 name = "server"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "error",
  "hyper",
  "sdk",
- "serde",
  "tokio",
  "tracing",
  "tracing-futures",
  "tracing-subscriber",
+ "types",
 ]
 
 [[package]]
@@ -1008,10 +1005,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 name = "store"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "error",
- "serde",
  "sled",
+ "types",
 ]
 
 [[package]]
@@ -1185,6 +1181,15 @@ name = "try-lock"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
+
+[[package]]
+name = "types"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "error",
+ "serde",
+]
 
 [[package]]
 name = "unicode-bidi"

@@ -1,33 +1,20 @@
 use error::Error;
 use ring::signature::{Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
 use ring::{digest, pbkdf2};
-use serde::{Deserialize, Serialize};
 use std::num::NonZeroU32;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Claims {
-    email: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Token {
-    claims: Claims,
-    signature: Vec<u8>,
-}
+use types::{Token, Claims};
 
 pub fn gen_token(key_pair: &Ed25519KeyPair, email: &str) -> Result<Token, Error> {
     let claims = Claims {
         email: String::from(email),
     };
-    let bytes: Vec<u8> =
-        bincode::serialize(&claims).map_err(|e| Error::wrap("serialize token claims", e))?;
+    let bytes: Vec<u8> = types::ser(&claims)?;
     let signature: Vec<u8> = key_pair.sign(&bytes).as_ref().into();
     Ok(Token { claims, signature })
 }
 
 pub fn verify_token(key_pair: &Ed25519KeyPair, token: &Token) -> Result<bool, Error> {
-    let bytes: Vec<u8> =
-        bincode::serialize(&token.claims).map_err(|e| Error::wrap("serialize token claims", e))?;
+    let bytes: Vec<u8> = types::ser(&token.claims)?;
     let peer_public_key_bytes = key_pair.public_key().as_ref();
     let peer_public_key = UnparsedPublicKey::new(&ED25519, &peer_public_key_bytes);
     Ok(peer_public_key.verify(&bytes, &token.signature).is_ok())

@@ -1,5 +1,5 @@
 use error::Error;
-use serde::{Deserialize, Serialize};
+use types::UserAuth;
 use std::path::Path;
 
 pub struct Handle {
@@ -17,15 +17,8 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Handle, Error> {
     Ok(Handle::new(db))
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UserAuth {
-    pub username: String,
-    pub pw_hash: Vec<u8>,
-}
-
 pub fn store_user_auth(h: &Handle, user: &UserAuth) -> Result<(), Error> {
-    let bytes: Vec<u8> =
-        bincode::serialize(&user).map_err(|e| Error::wrap("serialize UserAuth", e))?;
+    let bytes: Vec<u8> = types::ser(&user)?;
     h.db.insert(&user.username, bytes)
         .map_err(|e| Error::wrap("store user", e))?;
     Ok(())
@@ -36,8 +29,7 @@ pub fn get_user_auth(h: &Handle, username: &str) -> Result<Option<UserAuth>, Err
         h.db.get(username)
             .map_err(|e| Error::wrap("get UserAuth", e))?;
     if let Some(bytes) = bytes {
-        let user_auth: UserAuth = bincode::deserialize(bytes.as_ref())
-            .map_err(|e| Error::wrap("deserialize UserAuth", e))?;
+        let user_auth: UserAuth = types::de(bytes.as_ref())?;
         return Ok(Some(user_auth));
     }
     Ok(None)
