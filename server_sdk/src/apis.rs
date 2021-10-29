@@ -1,6 +1,8 @@
 use super::state::State;
 use error::Error;
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SignUpReq {
     pub username: String,
     pub password: String,
@@ -15,11 +17,13 @@ pub fn sign_up(state: &State, req: SignUpReq) -> Result<(), Error> {
     store::store_user_auth(&state.handle, &user_auth)
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct LoginReq {
     pub username: String,
     pub password: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub enum LoginRes {
     Success,
     Fail,
