@@ -11,5 +11,5 @@ tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.1", features = ["env-filter"] }
 bincode = "1.3.3"
 serde = { version = "1.0.130", features = ["derive"] }
-server_sdk = { path = "../server_sdk" }
+sdk = { path = "../sdk" }
 error = { path = "../error" }

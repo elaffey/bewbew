@@ -2,7 +2,7 @@ use error::Error;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server};
 use serde::{Deserialize, Serialize};
-use server_sdk::apis::{LoginReq, LoginRes, SignUpReq};
+use sdk::apis::{LoginReq, LoginRes, SignUpReq};
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tracing::metadata::LevelFilter;
@@ -76,7 +76,7 @@ pub async fn go() {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let h = server_sdk::hi();
+    let h = sdk::hi();
     dbg!(h);
     let filter = EnvFilter::from_default_env()
         .add_directive(LevelFilter::TRACE.into())
