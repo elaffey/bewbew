@@ -1,11 +1,11 @@
 [package]
-name = "bewbew"
+name = "server"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 hyper = { version = "0.14.14", features = ["full"] }
-tokio = { version = "1.12.0", features = ["full"] }
+tokio = { version = "1.13.0", features = ["rt-multi-thread"] }
 tracing = "0.1.29"
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.1", features = ["env-filter"] }

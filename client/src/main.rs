@@ -30,8 +30,6 @@ async fn call_apis() -> Result<(), Error> {
     let bytes = res.bytes().await.map_err(|e| Error::wrap("getting request bytes", e))?;
     let added: PlusOneResType = bincode::deserialize(&bytes).unwrap();
     dbg!(added);
-
-    // dbg!(res);
     Ok(())
 }
 
@@ -43,7 +41,7 @@ async fn go() {
 }
 
 fn main() {
-    tokio::runtime::Builder::new_multi_thread()
+    tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap()
