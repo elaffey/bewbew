@@ -1,6 +1,5 @@
-use std::io::Read;
-use serde::{Deserialize, Serialize};
 use error::Error;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Req {
@@ -53,20 +52,23 @@ pub struct UserAuth {
     pub pw_hash: Vec<u8>,
 }
 
-pub fn ser<T: ?Sized>(value: &T) -> Result<Vec<u8>, Error> where
-    T: Serialize, 
+pub fn ser<T: ?Sized>(value: &T) -> Result<Vec<u8>, Error>
+where
+    T: Serialize,
 {
     bincode::serialize(value).map_err(|e| Error::wrap("ser", e))
 }
 
-pub fn de<'a, T>(bytes: &'a [u8]) -> Result<T, Error> where
+pub fn de<'a, T>(bytes: &'a [u8]) -> Result<T, Error>
+where
     T: Deserialize<'a>,
 {
     bincode::deserialize(bytes).map_err(|e| Error::wrap("de", e))
 }
 
-pub fn de_from<R, T>(reader: R) -> Result<T, Error> where
-    R: Read,
+pub fn de_from<R, T>(reader: R) -> Result<T, Error>
+where
+    R: std::io::Read,
     T: serde::de::DeserializeOwned,
 {
     bincode::deserialize_from(reader).map_err(|e| Error::wrap("de_from", e))

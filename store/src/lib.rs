@@ -1,6 +1,6 @@
 use error::Error;
-use types::UserAuth;
 use std::path::Path;
+use types::UserAuth;
 
 pub struct Handle {
     db: sled::Db,

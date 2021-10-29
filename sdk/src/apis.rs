@@ -1,6 +1,6 @@
 use super::state::State;
 use error::Error;
-use types::{UserAuth, SignUpReq, LoginRes, LoginReq};
+use types::{LoginReq, LoginRes, SignUpReq, UserAuth};
 
 pub fn sign_up(state: &State, req: SignUpReq) -> Result<(), Error> {
     let pw_hash = super::auth::hash_pw(&req.username, &req.password, &state.salt_secret);

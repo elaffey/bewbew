@@ -2,7 +2,7 @@ use error::Error;
 use ring::signature::{Ed25519KeyPair, KeyPair, UnparsedPublicKey, ED25519};
 use ring::{digest, pbkdf2};
 use std::num::NonZeroU32;
-use types::{Token, Claims};
+use types::{Claims, Token};
 
 pub fn gen_token(key_pair: &Ed25519KeyPair, email: &str) -> Result<Token, Error> {
     let claims = Claims {
