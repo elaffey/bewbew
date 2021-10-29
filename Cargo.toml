@@ -4,5 +4,6 @@ members = [
     "sdk",
     "cli",
     "error",
-    "store"
+    "store",
+    "client"
 ]

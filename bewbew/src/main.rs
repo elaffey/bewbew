@@ -1,6 +1,6 @@
 use error::Error;
 use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Request, Response, Server};
+use hyper::{Body, Request, StatusCode, Response, Server};
 use serde::{Deserialize, Serialize};
 use sdk::apis::{LoginReq, LoginRes, SignUpReq};
 use std::convert::Infallible;
@@ -12,9 +12,18 @@ use tracing_subscriber::filter::EnvFilter;
 
 #[derive(Serialize, Deserialize, Debug)]
 enum Req {
+    PlusOne(u32),
     SignUpReq(SignUpReq),
     Login(LoginReq),
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+struct PlusOneRes {
+    msg: String,
+    num: u32,
+}
+
+type PlusOneResType = Result<PlusOneRes, Error>;
 
 async fn read_request<T>(req: Request<Body>) -> Result<T, Error>
 where
@@ -30,6 +39,17 @@ where
     Ok(result)
 }
 
+fn do_adding(n: u32) -> PlusOneResType {
+    if n == 3 {
+        return Err(Error::new(String::from("I don't like 3s :(")));
+    }
+    let res = PlusOneRes {
+        msg: String::from("hope you like it :)"),
+        num: n + 1,
+    };
+    Ok(res)
+}
+
 async fn serve(req: Request<Body>) -> Response<Body> {
     let span = span!(
         Level::TRACE,
@@ -42,12 +62,24 @@ async fn serve(req: Request<Body>) -> Response<Body> {
     info!("received request");
     match read_request::<Req>(req).await {
         Ok(r) => {
-            dbg!(r);
-            Response::new(Body::from("hihi"))
+            dbg!(&r);
+            match r {
+                Req::PlusOne(n) => {
+                    let res = do_adding(n);
+                    let bytes = bincode::serialize(&res).unwrap();
+                    Response::new(Body::from(bytes))
+                }
+                _ => {
+                    Response::new(Body::from("hihi"))
+                }
+            }
         }
         Err(e) => {
             let err_msg = format!("Error - {}", e);
-            Response::new(Body::from(err_msg))
+            Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(Body::from(err_msg))
+                .unwrap()
         }
     }
 }
