@@ -1,7 +1,6 @@
-#[allow(dead_code)]
 use error::Error;
 use reqwest::Client;
-use types::{LoginReq, LoginRes, PlusOneRes, Req, SignUpReq};
+use types::{LoginReq, LoginRes, PlusOneRes, Req, SignUpReq, SignUpRes};
 
 async fn call<T>(client: &Client, req: Req) -> Result<T, Error>
 where
@@ -26,7 +25,7 @@ async fn do_adding(client: &Client, n: u32) -> Result<Result<PlusOneRes, Error>,
     call(&client, req).await
 }
 
-async fn sign_up(client: &Client, req: SignUpReq) -> Result<Result<(), Error>, Error> {
+async fn sign_up(client: &Client, req: SignUpReq) -> Result<Result<SignUpRes, Error>, Error> {
     let req = Req::SignUpReq(req);
     call(&client, req).await
 }

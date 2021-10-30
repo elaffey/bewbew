@@ -23,6 +23,12 @@ pub struct SignUpReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub enum SignUpRes {
+    Success,
+    UserAlreadyExists,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct LoginReq {
     pub username: String,
     pub password: String,
@@ -30,7 +36,7 @@ pub struct LoginReq {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum LoginRes {
-    Success,
+    Success(Token),
     Fail,
     UserNotFound,
 }

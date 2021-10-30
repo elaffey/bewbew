@@ -1,14 +1,18 @@
 use super::state::State;
 use error::Error;
-use types::{LoginReq, LoginRes, SignUpReq, UserAuth};
+use types::{LoginReq, LoginRes, SignUpReq, SignUpRes, UserAuth};
 
-pub fn sign_up(state: &State, req: SignUpReq) -> Result<(), Error> {
+pub fn sign_up(state: &State, req: SignUpReq) -> Result<SignUpRes, Error> {
     let pw_hash = super::auth::hash_pw(&req.username, &req.password, &state.salt_secret);
     let user_auth = UserAuth {
         username: req.username,
         pw_hash,
     };
-    store::store_user_auth(&state.handle, &user_auth)
+    let res = store::store_user_auth(&state.handle, &user_auth)?;
+    match res {
+        true => Ok(SignUpRes::Success),
+        false => Ok(SignUpRes::UserAlreadyExists),
+    }
 }
 
 pub fn login(state: &State, req: LoginReq) -> Result<LoginRes, Error> {
@@ -19,12 +23,12 @@ pub fn login(state: &State, req: LoginReq) -> Result<LoginRes, Error> {
             &user_auth.pw_hash,
             &state.salt_secret,
         );
-        let res = match ok {
-            true => LoginRes::Success,
-            false => LoginRes::Fail,
-        };
-        return Ok(res);
+        if !ok {
+            return Ok(LoginRes::Fail);
+        }
+        let token = super::auth::gen_token(&state.key_pair, &req.username)?;
+        Ok(LoginRes::Success(token))
     } else {
-        return Ok(LoginRes::UserNotFound);
+        Ok(LoginRes::UserNotFound)
     }
 }

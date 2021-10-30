@@ -1,4 +1,5 @@
 use error::Error;
+use sled::CompareAndSwapError;
 use std::path::Path;
 use types::UserAuth;
 
@@ -17,11 +18,14 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Handle, Error> {
     Ok(Handle::new(db))
 }
 
-pub fn store_user_auth(h: &Handle, user: &UserAuth) -> Result<(), Error> {
+pub fn store_user_auth(h: &Handle, user: &UserAuth) -> Result<bool, Error> {
     let bytes: Vec<u8> = types::ser(&user)?;
-    h.db.insert(&user.username, bytes)
+    let res = h.db.compare_and_swap(&user.username, None as Option<&[u8]>, Some(bytes))
         .map_err(|e| Error::wrap("store user", e))?;
-    Ok(())
+    match res {
+        Ok(_) => Ok(true),
+        Err(CompareAndSwapError { .. }) => Ok(false),
+    }
 }
 
 pub fn get_user_auth(h: &Handle, username: &str) -> Result<Option<UserAuth>, Error> {
