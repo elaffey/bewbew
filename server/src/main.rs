@@ -30,19 +30,37 @@ async fn route(req: Request<Body>) -> Result<Response<Body>, Error> {
     match req {
         types::Req::Login(r) => {
             info!("login");
-            let res = sdk::apis::login(&STATE, r);
+            let res = match sdk::apis::login(&STATE, r) {
+                Ok(ok) => Ok(ok),
+                Err(e) => {
+                    error!("error - {}", e);
+                    Err(Error::new(String::from("unexpected error")))
+                }
+            };
             let bytes = types::ser(&res)?;
             Ok(Response::new(Body::from(bytes)))
         }
         types::Req::SignUpReq(r) => {
             info!("sign up");
-            let res = sdk::apis::sign_up(&STATE, r);
+            let res = match sdk::apis::sign_up(&STATE, r) {
+                Ok(ok) => Ok(ok),
+                Err(e) => {
+                    error!("error - {}", e);
+                    Err(Error::new(String::from("unexpected error")))
+                }
+            };
             let bytes = types::ser(&res)?;
             Ok(Response::new(Body::from(bytes)))
         }
         types::Req::PlusOne(r) => {
             info!("plus one");
-            let res = sdk::apis::plus_one(r);
+            let res = match sdk::apis::plus_one(r) {
+                Ok(ok) => Ok(ok),
+                Err(e) => {
+                    error!("error - {}", e);
+                    Err(Error::new(String::from("unexpected error")))
+                }
+            };
             let bytes = types::ser(&res)?;
             Ok(Response::new(Body::from(bytes)))
         }
@@ -62,10 +80,10 @@ async fn serve(req: Request<Body>) -> Response<Body> {
     match route(req).await {
         Ok(res) => res,
         Err(e) => {
-            let err_msg = format!("Error - {}", e);
+            error!("error - {}", e);
             Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::from(err_msg))
+                .body(Body::default())
                 .unwrap()
         }
     }
