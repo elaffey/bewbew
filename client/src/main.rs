@@ -1,6 +1,6 @@
 use error::Error;
 use reqwest::Client;
-use types::{LoginReq, LoginRes, PlusOneRes, Req, SignUpReq, SignUpRes};
+use types::{LoginReq, LoginRes, PlusOneReq, PlusOneRes, Req, SignUpReq, SignUpRes};
 
 async fn call<T>(client: &Client, req: Req) -> Result<T, Error>
 where
@@ -20,8 +20,8 @@ where
     types::de::<T>(&bytes)
 }
 
-async fn do_adding(client: &Client, n: u32) -> Result<Result<PlusOneRes, Error>, Error> {
-    let req = Req::PlusOne(n);
+async fn plus_one(client: &Client, req: PlusOneReq) -> Result<Result<PlusOneRes, Error>, Error> {
+    let req = Req::PlusOne(req);
     call(&client, req).await
 }
 
@@ -36,8 +36,10 @@ async fn login(client: &Client, req: LoginReq) -> Result<Result<LoginRes, Error>
 }
 
 async fn test_do_add(client: &Client) {
-    let req = 3;
-    let res = do_adding(&client, req).await;
+    let req = PlusOneReq {
+        num: 3
+    };
+    let res = plus_one(&client, req).await;
     println!("{:?}", res);
 }
 

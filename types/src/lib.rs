@@ -3,9 +3,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Req {
-    PlusOne(u32),
+    PlusOne(PlusOneReq),
     SignUpReq(SignUpReq),
     Login(LoginReq),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PlusOneReq {
+    pub num: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -13,8 +18,6 @@ pub struct PlusOneRes {
     pub msg: String,
     pub num: u32,
 }
-
-pub type PlusOneResType = Result<PlusOneRes, Error>;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SignUpReq {

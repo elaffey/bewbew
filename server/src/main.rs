@@ -9,7 +9,6 @@ use tracing::metadata::LevelFilter;
 use tracing::{error, info, span, Level};
 use tracing_futures::Instrument;
 use tracing_subscriber::filter::EnvFilter;
-use types::{PlusOneRes, PlusOneResType, Req};
 
 lazy_static! {
     static ref STATE: State = State::default().unwrap();
@@ -23,39 +22,27 @@ async fn read_request(req: Request<Body>) -> Result<impl std::io::Read, Error> {
     Ok(body.reader())
 }
 
-fn do_adding(n: u32) -> PlusOneResType {
-    if n == 3 {
-        return Err(Error::new(String::from("I don't like 3s :(")));
-    }
-    let res = PlusOneRes {
-        msg: String::from("hope you like it :)"),
-        num: n + 1,
-    };
-    Ok(res)
-}
-
 async fn route(req: Request<Body>) -> Result<Response<Body>, Error> {
-    let span = span!(Level::TRACE, "route",);
+    let span = span!(Level::TRACE, "route");
     let _enter = span.enter();
-
     let reader = read_request(req).await?;
     let req = types::de_from(reader)?;
     match req {
-        Req::Login(r) => {
+        types::Req::Login(r) => {
             info!("login");
             let res = sdk::apis::login(&STATE, r);
             let bytes = types::ser(&res)?;
             Ok(Response::new(Body::from(bytes)))
         }
-        Req::SignUpReq(r) => {
+        types::Req::SignUpReq(r) => {
             info!("sign up");
             let res = sdk::apis::sign_up(&STATE, r);
             let bytes = types::ser(&res)?;
             Ok(Response::new(Body::from(bytes)))
         }
-        Req::PlusOne(r) => {
+        types::Req::PlusOne(r) => {
             info!("plus one");
-            let res = do_adding(r);
+            let res = sdk::apis::plus_one(r);
             let bytes = types::ser(&res)?;
             Ok(Response::new(Body::from(bytes)))
         }

@@ -1,6 +1,6 @@
 use super::state::State;
 use error::Error;
-use types::{LoginReq, LoginRes, SignUpReq, SignUpRes, UserAuth};
+use types::{LoginReq, LoginRes, PlusOneReq, PlusOneRes, SignUpReq, SignUpRes, UserAuth};
 
 pub fn sign_up(state: &State, req: SignUpReq) -> Result<SignUpRes, Error> {
     let pw_hash = super::auth::hash_pw(&req.username, &req.password, &state.salt_secret);
@@ -31,4 +31,15 @@ pub fn login(state: &State, req: LoginReq) -> Result<LoginRes, Error> {
     } else {
         Ok(LoginRes::UserNotFound)
     }
+}
+
+pub fn plus_one(req: PlusOneReq) -> Result<PlusOneRes, Error> {
+    if req.num == 3 {
+        return Err(Error::new(String::from("I don't like 3s :(")));
+    }
+    let res = PlusOneRes {
+        msg: String::from("hope you like it :)"),
+        num: req.num + 1,
+    };
+    Ok(res)
 }
