@@ -31,3 +31,6 @@ check:
 
 doc:
 	cargo doc --open
+
+test:
+	cargo test
